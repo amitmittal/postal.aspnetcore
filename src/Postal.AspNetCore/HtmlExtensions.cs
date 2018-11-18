@@ -24,7 +24,7 @@ namespace Postal
         /// <param name="imagePathOrUrl">An image file path or URL. A file path can be relative to the web application root directory.</param>
         /// <param name="alt">The content for the &lt;img alt&gt; attribute.</param>
         /// <returns>An HTML &lt;img&gt; tag.</returns>
-        public static IHtmlContent EmbedImage(this IHtmlHelper html, string imagePathOrUrl, string alt = "")
+        public static IHtmlContent EmbedImage(this IHtmlHelper html, string imagePathOrUrl, string alt = "", string style = "")
         {
             if (!string.IsNullOrWhiteSpace(imagePathOrUrl))
             {
