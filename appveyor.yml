@@ -1,12 +1,59 @@
-version: 1.0.{build}
+version: 2.1.0-build{build}
 image: Visual Studio 2017
-nuget:
-  project_feed: true
-build:
-  verbosity: minimal
-test: off
+environment:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+pull_requests:
+  do_not_increment_build_number: true
+install:
+  - ps: |
+      git config --global core.autocrlf input
+      
+      #Get Path to csproj
+      $path = ".\src\Postal.AspNetCore\Postal.AspNetCore.csproj"
+
+      #Read csproj (XML)
+      $xml = [xml](Get-Content $path)
+      #Retieve Version Nodes
+      $versionPrefix = $xml.Project.PropertyGroup.VersionPrefix
+
+      if ($env:APPVEYOR_REPO_TAG -eq "true") {
+        $ver = $env:APPVEYOR_REPO_TAG_NAME
+        if($ver.StartsWith("v") -eq $true) { $ver = $ver.Substring(1) }
+        Update-AppveyorBuild -Version $ver
+      }
+      elseif([System.String]::IsNullOrEmpty($env:APPVEYOR_PULL_REQUEST_NUMBER) -eq $true) {
+        $commit = $env:APPVEYOR_REPO_COMMIT.substring(0,7)
+        Update-AppveyorBuild -Version "$versionPrefix-$env:APPVEYOR_BUILD_NUMBER-$commit"
+      }
+init:
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+before_build:
+  - dotnet restore
+build_script:
+  - dotnet build -c Release
+before_test:
+test_script:
+  - cd ./src/Postal.Tests/
+  - dotnet test -c Release
+  - cd ../../
+after_test:
+  - mkdir .\artifacts
+  - dotnet pack .\src\Postal.AspNetCore -o ..\..\artifacts --configuration Release /p:Version="%APPVEYOR_BUILD_VERSION%"
+artifacts:
+- path: .\artifacts\**\*.nupkg
+  name: NuGet
 deploy:
 - provider: NuGet
   api_key:
     secure: BUg/2zGAM0ydp1SSFKmKefvVud41TomH1PQSZ9u/ZMEIqQKHisuCLEOSPNbzNRrd
   skip_symbols: true
+  on:
+    branch: master
