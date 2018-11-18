@@ -1,4 +1,4 @@
-# Postal [![Build status](https://ci.appveyor.com/nuget/postal-aspnetcore-fd5d4mkpv73a?svg=true)](https://github.com/amitmittal/postal.aspnetcore) [![NuGet](https://img.shields.io/nuget/vpre/Postal.AspNetCore.svg)](https://www.nuget.org/packages/Postal.AspNetCore/) 
+# Postal [![Build status](https://ci.appveyor.com/api/projects/status/g6ys1oke091ru99a?svg=true)](https://github.com/amitmittal/postal.aspnetcore) [![NuGet](https://img.shields.io/nuget/vpre/Postal.AspNetCore.svg)](https://www.nuget.org/packages/Postal.AspNetCore/) 
 
 
 A handy email sending library for ASP.NET Core 2.0 and above.
