@@ -26,17 +26,21 @@ namespace Postal
         /// <returns>An HTML &lt;img&gt; tag.</returns>
         public static IHtmlContent EmbedImage(this IHtmlHelper html, string imagePathOrUrl, string alt = "")
         {
-            if (string.IsNullOrWhiteSpace(imagePathOrUrl)) throw new ArgumentException("Path or URL required", "imagePathOrUrl");
-
-            if (IsFileName(imagePathOrUrl))
+            if (!string.IsNullOrWhiteSpace(imagePathOrUrl))
             {
-                var hosting = html.ViewContext.HttpContext.RequestServices.GetService<IHostingEnvironment>();
-                string webRootPath = hosting.WebRootPath;
-                imagePathOrUrl = System.IO.Path.Combine(webRootPath, imagePathOrUrl);
+                if (IsFileName(imagePathOrUrl))
+                {
+                    var hosting = html.ViewContext.HttpContext.RequestServices.GetService<IHostingEnvironment>();
+                    imagePathOrUrl = hosting.WebRootPath + System.IO.Path.DirectorySeparatorChar + imagePathOrUrl.Replace('/', System.IO.Path.DirectorySeparatorChar).Replace('\\', System.IO.Path.DirectorySeparatorChar);
+                }
+                var imageEmbedder = (ImageEmbedder)html.ViewData["Postal.ImageEmbedder"];
+                var resource = imageEmbedder.ReferenceImage(imagePathOrUrl);
+                return new HtmlString(string.Format("<img src=\"cid:{0}\" alt=\"{1}\" style=\"{2}\"/>", resource.ContentId, html.Encode(alt), html.Encode(style)));
             }
-            var imageEmbedder = (ImageEmbedder)html.ViewData[ImageEmbedder.ViewDataKey];
-            var resource = imageEmbedder.ReferenceImage(imagePathOrUrl);
-            return new HtmlString(string.Format("<img src=\"cid:{0}\" alt=\"{1}\"/>", resource.ContentId, html.Encode(alt)));
+            else
+            {
+                return new HtmlString(string.Format("<img src=\"{0}\" alt=\"{1}\" style=\"{2}\"/>", "", html.Encode(alt), html.Encode(style)));
+            }
         }
 
         static bool IsFileName(string pathOrUrl)
